@@ -19,7 +19,6 @@
         <checkstyle.config.location>checkstyle.xml</checkstyle.config.location>
 
     </properties>
-
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <plugins>
