@@ -1,9 +1,11 @@
 package pl.edu.agh.mwo.invoice;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
@@ -122,7 +124,7 @@ public class Invoice {
         StringBuilder sb = new StringBuilder();
         sb.append("Invoice number: ").append(this.invoiceNumber).append("\n");
         sb.append("==========================================\n");
-        sb.append(String.format("%-20s %-10s %-10s %-10s %-10s\n", "Product", "Quantity", "Price", "Tax", "Total"));
+        sb.append(String.format(Locale.US, "%-20s %-10s %-10s %-10s %-10s\n", "Product", "Quantity", "Price", "Tax", "Total"));
         sb.append("------------------------------------------\n");
         
         for (Map.Entry<Product, Integer> entry : products.entrySet()) {
@@ -132,7 +134,7 @@ public class Invoice {
             BigDecimal tax = product.getPriceWithTax().subtract(price);
             BigDecimal total = product.getPriceWithTax().multiply(new BigDecimal(quantity));
             
-            sb.append(String.format("%-20s %-10d %-10.1f %-10.1f %-10.1f\n", 
+            sb.append(String.format(Locale.US, "%-20s %-10d %-10.1f %-10.1f %-10.1f\n", 
                 product.getName(), 
                 quantity, 
                 price, 
@@ -141,9 +143,9 @@ public class Invoice {
         }
         
         sb.append("==========================================\n");
-        sb.append("Total net: ").append(getNetTotal()).append("\n");
-        sb.append("Total tax: ").append(getTaxTotal()).append("\n");
-        sb.append("Total gross: ").append(getGrossTotal()).append("\n");
+        sb.append("Total net: ").append(getNetTotal().setScale(2, RoundingMode.HALF_UP)).append("\n");
+        sb.append("Total tax: ").append(getTaxTotal().setScale(2, RoundingMode.HALF_UP)).append("\n");
+        sb.append("Total gross: ").append(getGrossTotal().setScale(2, RoundingMode.HALF_UP)).append("\n");
         
         return sb.toString();
     }

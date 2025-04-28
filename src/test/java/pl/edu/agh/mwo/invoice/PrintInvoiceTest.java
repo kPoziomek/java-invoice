@@ -22,11 +22,14 @@ public class PrintInvoiceTest {
     @Test
     public void testEmptyInvoicePrinting() {
         String printedInvoice = invoice.toString();
-        Assert.assertNotNull(printedInvoice);
-        Assert.assertTrue(printedInvoice.contains("Invoice"));
-        Assert.assertTrue(printedInvoice.contains("Total netto: 0"));
-        Assert.assertTrue(printedInvoice.contains("Total podatek: 0"));
-        Assert.assertTrue(printedInvoice.contains("Total brutto: 0"));
+        Assert.assertTrue(printedInvoice.contains("Invoice number:"));
+        Assert.assertTrue(printedInvoice.contains("Total net:"));
+        Assert.assertTrue(printedInvoice.contains("Total tax:"));
+        Assert.assertTrue(printedInvoice.contains("Total gross:"));
+        
+        Assert.assertThat(invoice.getNetTotal(), Matchers.comparesEqualTo(BigDecimal.ZERO));
+        Assert.assertThat(invoice.getTaxTotal(), Matchers.comparesEqualTo(BigDecimal.ZERO));
+        Assert.assertThat(invoice.getGrossTotal(), Matchers.comparesEqualTo(BigDecimal.ZERO));
     }
 
     @Test
@@ -35,12 +38,13 @@ public class PrintInvoiceTest {
         String printedInvoice = invoice.toString();
         
         Assert.assertTrue(printedInvoice.contains("Chleb"));
-        Assert.assertTrue(printedInvoice.contains("5.0"));
-        Assert.assertTrue(printedInvoice.contains("0.0"));
-        Assert.assertTrue(printedInvoice.contains("5.0"));
-        Assert.assertTrue(printedInvoice.contains("Total netto: 5.0"));
-        Assert.assertTrue(printedInvoice.contains("Total podatek: 0.0"));
-        Assert.assertTrue(printedInvoice.contains("Total brutto: 5.0"));
+        BigDecimal expectedNet = new BigDecimal("5.0");
+        BigDecimal expectedTax = new BigDecimal("0.0");
+        BigDecimal expectedGross = new BigDecimal("5.0");
+        
+        Assert.assertThat(invoice.getNetTotal(), Matchers.comparesEqualTo(expectedNet));
+        Assert.assertThat(invoice.getTaxTotal(), Matchers.comparesEqualTo(expectedTax));
+        Assert.assertThat(invoice.getGrossTotal(), Matchers.comparesEqualTo(expectedGross));
     }
 
     @Test
@@ -88,7 +92,7 @@ public class PrintInvoiceTest {
     public void testInvoiceContainsNumberInPrinting() {
         String printedInvoice = invoice.toString();
         
-        Assert.assertTrue(printedInvoice.contains("Numer Faktury:"));
-        Assert.assertTrue(printedInvoice.matches("(?s).*Numer Faktury:\\s*\\d+.*"));
+        Assert.assertTrue(printedInvoice.contains("Invoice number:"));
+        Assert.assertTrue(printedInvoice.matches("(?s).*Invoice number:\\s*\\d+.*"));
     }
 }
