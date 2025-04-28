@@ -7,7 +7,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
-import pl.edu.agh.mwo.invoice.Invoice;
 import pl.edu.agh.mwo.invoice.product.DairyProduct;
 import pl.edu.agh.mwo.invoice.product.OtherProduct;
 import pl.edu.agh.mwo.invoice.product.Product;
@@ -18,7 +17,36 @@ public class InvoiceTest {
 
     @Before
     public void createEmptyInvoiceForTheTest() {
+        Invoice.resetInvoiceCounter();
         invoice = new Invoice();
+    }
+
+    @Test
+    public void generateIncvoiceNumber() {
+        int InvoiceNumber = invoice.getInvoiceNumber();
+        Assert.assertThat(InvoiceNumber, Matchers.greaterThan(0));
+    }
+
+    @Test
+    public void testNumberShouldHaveLengthMoreThan6Numbers() {
+        int InvoiceNumber = invoice.getInvoiceNumber();
+        Assert.assertThat(String.valueOf(InvoiceNumber).length(), Matchers.greaterThan(6));
+    }
+
+    @Test
+    public void testInvoiceShouldHaveDifferentNumbers() {
+        Invoice invoice1 = new Invoice();
+        Invoice invoice2 = new Invoice();
+
+        Assert.assertThat(invoice1.getInvoiceNumber(), Matchers.not(invoice2.getInvoiceNumber()));
+    }
+
+    @Test
+    public void testTwoInvoiceHaveConsequentNumbers() {
+        Invoice.resetInvoiceCounter();
+        Invoice invoice1 = new Invoice();
+        Invoice invoice2 = new Invoice();
+        Assert.assertThat(invoice1.getInvoiceNumber() + 1, Matchers.equalTo(invoice2.getInvoiceNumber()));
     }
 
     @Test

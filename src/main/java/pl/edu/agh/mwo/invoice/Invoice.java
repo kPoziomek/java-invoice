@@ -1,13 +1,43 @@
 package pl.edu.agh.mwo.invoice;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import pl.edu.agh.mwo.invoice.product.Product;
 
 public class Invoice {
     private Map<Product, Integer> products = new HashMap<Product, Integer>();
+    private int invoiceNumber;
+    private static List<Invoice> duplicates = new ArrayList<>();
+    
+    public static final int BASE_INVOICE_NUMBER = 10000000;
+    
+    private static int invoiceCounter = BASE_INVOICE_NUMBER;
+
+    public Invoice() {
+        this.invoiceNumber = generateInvoiceNumber();
+    }
+    
+    public static void resetInvoiceCounter() {
+        invoiceCounter = BASE_INVOICE_NUMBER;
+    }
+    
+    public static void resetDuplicates() {
+        duplicates.clear();
+    }
+
+    public static int getCurrentInvoiceNumber() {
+        return invoiceCounter;
+    }
+    
+    private int generateInvoiceNumber() {
+        return invoiceCounter++;
+    }
+
 
     public void addProduct(Product product) {
         addProduct(product, 1);
@@ -40,5 +70,81 @@ public class Invoice {
             totalGross = totalGross.add(product.getPriceWithTax().multiply(quantity));
         }
         return totalGross;
+    }
+
+    public int getInvoiceNumber() {
+        return this.invoiceNumber;
+    }
+
+    public Invoice createDuplicate() {
+        Invoice duplicate = new Invoice();
+        
+        for (Map.Entry<Product, Integer> entry : this.products.entrySet()) {
+            duplicate.addProduct(entry.getKey(), entry.getValue());
+        }
+        
+        duplicates.add(duplicate);
+        return duplicate;
+    }
+    
+    public boolean removeDuplicate(Invoice duplicate) {
+        if (duplicates.contains(duplicate)) {
+            duplicates.remove(duplicate);
+            return true;
+        }
+        return false;
+    }
+    
+    public boolean removeDuplicate() {
+        if (duplicates.isEmpty()) {
+            return false;
+        }
+        duplicates.clear();
+        return true;
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        
+        Invoice invoice = (Invoice) obj;
+        return products.equals(invoice.products);
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(products);
+    }
+    
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Invoice number: ").append(this.invoiceNumber).append("\n");
+        sb.append("==========================================\n");
+        sb.append(String.format("%-20s %-10s %-10s %-10s %-10s\n", "Product", "Quantity", "Price", "Tax", "Total"));
+        sb.append("------------------------------------------\n");
+        
+        for (Map.Entry<Product, Integer> entry : products.entrySet()) {
+            Product product = entry.getKey();
+            Integer quantity = entry.getValue();
+            BigDecimal price = product.getPrice();
+            BigDecimal tax = product.getPriceWithTax().subtract(price);
+            BigDecimal total = product.getPriceWithTax().multiply(new BigDecimal(quantity));
+            
+            sb.append(String.format("%-20s %-10d %-10.1f %-10.1f %-10.1f\n", 
+                product.getName(), 
+                quantity, 
+                price, 
+                tax, 
+                total));
+        }
+        
+        sb.append("==========================================\n");
+        sb.append("Total net: ").append(getNetTotal()).append("\n");
+        sb.append("Total tax: ").append(getTaxTotal()).append("\n");
+        sb.append("Total gross: ").append(getGrossTotal()).append("\n");
+        
+        return sb.toString();
     }
 }
